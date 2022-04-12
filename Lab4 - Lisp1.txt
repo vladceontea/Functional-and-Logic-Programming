@@ -1,0 +1,168 @@
+;7.a)Write a function to eliminate the n-th element of a linear list.
+;b)Write a function to determine the successor of a number represented digit by digit as a list, without transforming the representation of the number from list to number. 
+;Example: (1 9 3 5 9 9) --> (1 9 3 6 0 0)
+;c)Write a function to return the set of all the atoms of a list.
+;Exemplu: (1 (2 (1 3 (2 4) 3) 1) (1 4)) ==> (1 2 3 4)
+;d)Write a function to test whether a linear list is a set.
+
+
+;a)Write a function to eliminate the n-th element of a linear list.
+
+; eliminateNth(L, N)
+; eliminateNth(L - list, N - number)
+; eliminateNth([L1, L2, ..., Ln], N) = 
+;   = if n == 0, return []
+;   = if N == 1, return [L2, ..., Ln]
+;   = otherwise, return L1 U eliminateNth([L2, ..., Ln], N)
+
+
+(defun eliminateNth (list n)
+    (cond
+        ((null list) nil)
+        ((= n 1) (cdr list))
+        (t (cons (car list) (eliminateNth(cdr list) (- n 1))))
+    )
+)
+
+(print (eliminateNth '(1 2 3 4 5 6) -2))
+
+;b)Write a function to determine the successor of a number represented digit by digit as a list, without transforming the representation of the number from list to number. 
+;Example: (1 9 3 5 9 9) --> (1 9 3 6 0 0)
+
+; appendList(L, M)
+; appendList(L - list, M - list)
+; appendList([L1, L2, ..., Ln], [M1, M2, ..., Mm]) = 
+;   = if n == 0, return [M1, M2, ..., Mm]
+;   = otherwise, return L1 U appendList([L2, ..., Ln], [M1, M2, ..., Mm])
+
+(defun appendList (l1 l2)
+    (cond
+        ((null l1) l2)
+        (t (cons (car l1) (appendList (cdr l1) l2)))
+    )
+)
+
+; reverseList(L)
+; reverseList(L - list)
+; reverseList([L1, L2, ..., Ln]) = 
+;   = if n == 0, return []
+;   = otherwise, return reverseList([L2, ..., Ln]) U L1
+
+(defun reverseList (list)
+    (cond
+        ((null list) nil)
+        (t (appendList (reverseList (cdr list)) (list(car list))))
+    )
+)
+
+; nextNumber(L, C, H)
+; nextNumber(L - list, C - number, H - head)
+; nextNumber([L1, L2, ..., Ln], C, H) = 
+;   = if n == 0, return []
+;   = if H == 1 and L1 == 9, return 0 U nextNumber([L2, ..., Ln], 1, 0)
+;   = if H == 1 and L1 != 9, return L1+1 U nextNumber([L2, ..., Ln], 0, 0)
+;   = if C == 1 and L1 == 9 and n == 1, return [1] U [0]
+;   = if C == 1 and L1 == 9, return [0] U nextNumber([L2, ..., Ln], 1, 0)
+;   = if C == 1 and L1 != 9, return L1+1 U nextNumber([L2, ..., Ln], 0, 0)
+;   = otherwise, return L1 U nextNumber([L2, ..., Ln], 0, 0)
+
+(defun nextNumber (list carry head)
+    (cond
+        ((null list) nil)
+        ((and (= head 1) (= (car list) 9)) (cons 0 (nextNumber(cdr list) 1 0)))
+        ((and (= head 1) (/= (car list) 9)) (cons (+ 1 (car list)) (nextNumber(cdr list) 0 0)))
+        ((and (= carry 1) (= (car list) 9) (null (cdr list))) (list 0 1))
+        ((and (= carry 1) (= (car list) 9)) (cons 0 (nextNumber(cdr list) 1 0)))
+        ((and (= carry 1) (/= (car list) 9)) (cons (+ 1 (car list)) (nextNumber(cdr list) 0 0)))
+        (t (cons (car list) (nextNumber(cdr list) 0 0)))
+    
+    )
+)
+
+; successorNumber(L)
+; successorNumber(L - list)
+
+(defun successorNumber (list)
+    (reverseList (nextNumber (reverseList list) 0 1))
+    
+)
+
+(print (successorNumber '(9 9)))
+
+;c)Write a function to return the set of all the atoms of a list.
+;Exemplu: (1 (2 (1 3 (2 4) 3) 1) (1 4)) ==> (1 2 3 4)
+
+; makeAtoms(L)
+; makeAtoms(L - list)
+; makeAtoms([L1, L2, ..., Ln]) = 
+;   = if n == 0, return []
+;   = if L1 is list, return makeAtoms(L1) U makeAtoms([L2, ..., Ln])
+;   = otherwise, return L1 U makeAtoms([L2, ..., Ln])
+
+(defun makeAtoms (list)
+    (cond
+        ((null list) nil)
+        ((listP (car list)) (appendList (makeAtoms (car list)) (makeAtoms (cdr list))))
+        (t(cons (car list) (makeAtoms(cdr list))))
+    )
+)
+
+; ExistsList(L, N)
+; ExistsList(L - list, N - number)
+; ExistsList([L1, L2, ..., Ln], N) = 
+;   = if n == 0, return False
+;   = if L1 != N, ExistsList([L2, ..., Ln], N)
+;   = if L1 == N, return True
+
+(defun ExistsList (list number)
+    (cond
+        ((null list) nil)
+        ((not(equal number (car list))) (ExistsList (cdr list) number))
+        ((equal number (car list)) t)
+    )
+    
+)
+
+; makeSet(L)
+; makeSet(L - list)
+; makeSet([L1, L2, ..., Ln]) = 
+;   = if n == 0, return []
+;   = if EsistsList([L2, ..., Ln], L1), return makeSet([L2, ..., Ln])
+;   = otherwise, return L1 U makeSet([L2, ..., Ln])
+
+(defun makeSet (list)
+    (cond
+        ((null list) nil)
+        ((ExistsList (cdr list) (car list)) (makeSet (cdr list)))
+        (t (cons (car list) (makeSet (cdr list))))
+    )
+
+)
+
+; AtomSet(L)
+; AtomSet(L - list)
+
+(defun AtomSet (list)
+    (makeSet (makeAtoms list))
+)
+
+(print (AtomSet '(1 (2 (1 3 (2 4) 3) 1) (1 4))))
+
+;d)Write a function to test whether a linear list is a set. 
+
+; checkSet(L)
+; checkSet(L - list)
+; checkSet([L1, L2, ..., Ln]) = 
+;   = if n == 0, return True
+;   = if EsistsList([L2, ..., Ln], L1), return False
+;   = otherwise, return checkSet([L2, ..., Ln])
+
+(defun checkSet (list)
+    (cond
+        ((null list) T)
+        ((ExistsList (cdr list) (car list)) nil)
+        (t (checkSet (cdr list)))
+    )
+)
+
+(print (checkSet '(1 2 3 4 4)))

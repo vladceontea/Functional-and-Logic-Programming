@@ -1,0 +1,12 @@
+R1:
+
+replace_element_rec([L1, L2, L3, ..., Ln], Element, [M1, M2, M3, ..., Mm]) = 
+   = if n == 0, return []
+   = if L1 == Element, then [M1, M2, ..., Mn] U replace_element_rec([L2, L3, ..., Ln], Element, [M1, M2, M3, ..., Mm])
+   = otherwise, L1 U replace_element_rec([L2, L3, ..., Ln], Element, [M1, M2, M3, ..., Mm])
+
+
+find_element_rec([L1, L2, L3, ... Ln], Position, Current_Position) = 
+   = if Position == Current_Position, return L_Position
+   = if Current_Position > n, then return 0
+   = if Position > Current_Position then find_element_rec([L1, L2, L3, ... Ln], Position, Current_Position+1)

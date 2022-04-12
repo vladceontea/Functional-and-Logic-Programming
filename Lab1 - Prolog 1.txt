@@ -1,0 +1,57 @@
+P1:
+
+a.
+% Check if a list has an even number of elements without counting them
+% evenList(L)
+% evenList(L - List)
+% flow model: evenList(i)
+
+% evenList([L1, L2, L3, ..., Ln]) = 
+%    = if n == 0, return true
+%    = otherwise, evenList([L3, L4, ... Ln])
+
+
+evenList([]).
+evenList([_,_|T]):-
+        evenList(T).
+
+
+b.
+% Delete the first occurrence of the minimum element of the list
+% 
+% minElem(L, M)
+% minElem(L - list, M - Number)
+% flow model: minElem(i, o)
+% minElem([L1, L2, L3, ..., Ln]) = 
+%    = if n == 1, return L1
+%    = if L1 <= L2, minElem(L1, L3, ..., Ln)
+%    = otherwise, minElem(L2, L3, ..., Ln)
+
+minElem([M], M).
+minElem([H1,H2|T], M):-
+    H1=<H2,
+    minElem([H1|T], M).
+
+minElem([H1,H2|T], M):-
+    H1>H2,
+    minElem([H2|T], M).
+
+% deleteOne(L, R)
+% deleteOne(L - list, R - List)
+% flow model: deleteOne(i,o)
+% deleteOne([L1, L2, L3, ..., Ln]) = 
+%    = if n == 0, return []
+%    = if L1 == minElem([L1, L2, .. Ln]), return [L2, L3, ..., Ln]
+%    = otherwise, L1 U deleteOne(L2, L3, ..., Ln)
+
+deleteOne([],[]).
+deleteOne([H|T], R):-
+    minElem([H|T], M),
+    H=M,
+    R=T.
+
+deleteOne([H|T], R):-
+    minElem([H|T], M),
+    H>M,
+    deleteOne(T,RT),
+    R=[H|RT].

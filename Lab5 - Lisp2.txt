@@ -1,0 +1,113 @@
+;2. Return the list of nodes on the k-th level of a tree of type (1).
+
+; parcurg_st(arb, nv, nm)
+; parcurg_st(arb - list, nv - number, nm - number)
+; parcurg_st ([L1, L2, ..., Ln], nv, nm) = 
+;   = if n == 0, return []
+;   = if nv == nm + 1, return []
+;   = otherwise, return L1 U L2 U parcurg_st([L3, L4, ..., Ln], nv+1, nm+L2)
+
+(defun parcurg_st(arb nv nm)
+    (cond
+        ((null arb) nil)
+        ((= nv (+ 1 nm)) nil)
+        (t (cons (car arb) (cons (cadr arb) (parcurg_st (cddr arb) (+ 1 nv) (+ (cadr arb) nm)))))
+    )
+)
+
+
+(defun stang (arb)
+    (parcurg_st (cddr arb) 0 0)
+)
+
+; parcurg_st(arb, nv, nm)
+; parcurg_st(arb - list, nv - number, nm - number)
+; parcurg_st ([L1, L2, ..., Ln], nv, nm) = 
+;   = if n == 0, return []
+;   = if nv == nm + 1, return [L1, L2, ..., Ln]
+;   = otherwise, return L1 U L2 U parcurg_st([L3, L4, ..., Ln], nv+1, nm+L2)
+
+
+(defun parcurg_dr(arb nv nm)
+    (cond
+        ((null arb) nil)
+        ((= nv (+ 1 nm)) arb)
+        (t (parcurg_dr (cddr arb) (+ 1 nv) (+ (cadr arb) nm)))
+    )
+)
+
+
+(defun drept (arb)
+    (parcurg_dr (cddr arb) 0 0)
+)
+
+
+; appendList(L, M)
+; appendList(L - list, M - list)
+; appendList([L1, L2, ..., Ln], [M1, M2, ..., Mm]) = 
+;   = if n == 0, return [M1, M2, ..., Mm]
+;   = otherwise, return L1 U appendList([L2, ..., Ln], [M1, M2, ..., Mm])
+
+(defun appendList (l1 l2)
+    (cond
+        ((null l1) l2)
+        (t (cons (car l1) (appendList (cdr l1) l2)))
+    )
+)
+
+
+; nthLevel2(T, L)
+; nthLevel2(T - list, L - number)
+; nthLevel2([T1, T2, ..., Tn], L) = 
+;   = if n == 0, return []
+;   = if T1 == 2, return appendList(nthLevel2(stang('A' U [T1, T2, ..., Tn]), L-1),nthLevel2(drept('A' U [T1, T2, ..., Tn]), L-1) 
+;   = if T1 == 1, return nthLevel2([T2, ..., Tn], L-1)
+;   = if T1 == 0, return nthLevel2([T2, ..., Tn], L+1)
+;   = if T1 is not number and L == 0, return T1 U nthLevel2([T2, ..., Tn], L)
+;   = if T1 is not number and L != 0 , return nthLevel2([T2, ..., Tn], L)
+
+(defun nthLevel2 (tree level)
+   (cond
+       ((null tree) nil)
+       ((and (numberp (car tree)) (= 2 (car tree)))  (appendList (nthLevel2 (stang (cons 'A tree)) (- level 1)) (nthLevel2 (drept (cons 'A tree)) (- level 1))))
+       ((and (numberp (car tree)) (= (car tree) 1))  (nthLevel2 (cdr tree) (- level 1)))
+       ((and (numberp (car tree)) (= 0 (car tree)))  (nthLevel2 (cdr tree) (+ 1 level)))
+       ((and (not (numberp (car tree))) (= 0 level)) (cons (car tree) (nthLevel2 (cdr tree) level)))
+       ((and (not (numberp (car tree))) (/= level 0)) (nthLevel2 (cdr tree) level))
+    )
+)
+
+
+(print (nthLevel2 '(A 2 B 0 C 2 D 0 E 0) 2))
+
+;15.Write a function that reversesa list together with all its sublists elements, at any level.
+
+; reverseList(L)
+; reverseList(L - list)
+; reverseList([L1, L2, ..., Ln]) = 
+;   = if n == 0, return []
+;   = otherwise, return reverseList([L2, ..., Ln]) U L1
+
+
+(defun reverseList (list)
+    (cond
+        ((null list) nil)
+        (t (appendList (reverseList (cdr list)) (list(car list))))
+    )
+)
+
+; reverseAllLists(L)
+; reverseAllLists(L - list)
+; reverseAllLists([L1, L2, ..., Ln]) = 
+;   = if L is atom, return L
+;   = otherwise, return reverseList (reverseAllLists(Li))
+;                   (i = 1->n)
+
+(defun reverseAllLists (mylist)
+    (cond 
+        ((atom mylist) mylist)
+        (t (reverseList (mapcar #'reverseAllLists mylist)))
+    )
+)
+
+(print(reverseAllLists '(1 (7) 2 3 (4 (90 23) 5 (9 10)))))

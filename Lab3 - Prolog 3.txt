@@ -1,0 +1,81 @@
+% 9. Generate all permutation of N (N - given) respecting the property: 
+% for every 2<=i<=n exists an 1<=j<=i, so |v(i)-v(j)|=1.
+
+% insert(E, L, R)
+% insert (E - number, L - list, R - list)
+% flow model: insert(i,i,o)
+% insert(E, [L1, L2, ..., Ln]) = 
+%   = E U [L1, L2, .., Ln]
+%   = L1 U insert(E, [L2, L3, ..., Ln])
+
+insert(E, L, [E|L]).
+insert(E, [H|T], [H|R]):-
+       insert(E,T,R).
+       
+% perm(L, R)
+% perm(L - list, R - list)
+% flow model: perm(i,o)
+% perm([L1, L2, ..., Ln]) = 
+%   = if n == 0, return []
+%   = otherwise, insert(L1, perm([L2, L2, ... Ln]))
+       
+perm([], []).
+perm([H|T], P):-
+       perm(T,R),
+       insert(H,R,P).
+
+% checkElem(L, E, F)
+% checkElem(L - list, E - number, F - number)
+% flow model: checkElem(i,i,o)
+% F = 0 means L1 is the original head of the list (so no checks are required)
+% F = 1 means L1 is not the original head of the list (because all checks failed)
+% checkElem([L1, l2, ..., Ln], E, F) = 
+%   = if L1 == E and F == 0, return true
+%   = if L1 == E and F == 1, return false
+%   = if abs(L1-E) == 1, return true
+%   = otherwise, checkElem([L2, L3, ..., Ln], E, 1)
+
+checkElem([R|_],R,0).
+checkElem([R|_],R,1):- !,false.
+checkElem([H|_],R,_):-
+    abs(H-R) =:= 1.
+checkElem([_|T],R,_):-
+    checkElem(T,R,1).
+
+% checkList(L, R)
+% checkList(L - list, R - list)
+% flow model: checkList(i,o)
+% checkList([L1, l2, ..., Ln]) = 
+%   = if n == 0, return true
+%   = if checkElem(L1, 0) is true, checkList([L2, L3, ..., Ln])
+checkList([],_).
+checkList([H|T],R):-
+    checkElem(R,H,0),
+    checkList(T,R),!.
+
+
+% createList(N, L)
+% createList(N - number, L - list)
+% flow model: createList(i,o)
+% createList(N) = 
+%   = if N > 0, N U createList(N-1) 
+%   = if N == 0, return []
+createList(0, []).
+createList(N, [N|R]) :-
+    N > 0,
+    N1 is N - 1,
+    createList(N1, R).
+
+% oneSol(L, R)
+% oneSol(L - list, R - list)
+% flow model: oneSol(i,o)
+oneSol(L,R):-
+    perm(L,R),
+    checkList(R,R).
+
+% allSols(N, R)
+% allSols(N - number, R - list)
+% flow model: allSols(i,o)
+allSols(N,R):-
+    createList(N,R1),!,
+    findall(R2, oneSol(R1,R2), R).
